@@ -17,13 +17,14 @@ ALERT_TIMEOUT = 60 * 3
 ORDER_TIMEOUT = 40
 REFRESH_POSITIONS_FREQUENCY = 5 * 60    # refresh positions every 5 minutes
 UPDATE_ORDERS_FREQUENCY = 0.25          # frametime in seconds at which the orders queue is refreshed.
+MARGIN_MODE = 'cross'
 MARGIN_MODE_NONE = '------'
 
 def fixVersionFormat( version )->str:
     vl = version.split(".")
     return f'{vl[0]}.{vl[1]}.{vl[2].zfill(3)}'
 
-minCCXTversion = '4.1.11'
+minCCXTversion = '4.0.69'
 CCXTversion = fixVersionFormat(ccxt.__version__)
 print( 'CCXT Version:', ccxt.__version__)
 if( CCXTversion < fixVersionFormat(minCCXTversion) ):
@@ -31,6 +32,11 @@ if( CCXTversion < fixVersionFormat(minCCXTversion) ):
     print( 'WHOOK requires CCXT version', minCCXTversion,' or higher.')
     print( 'While it may run with earlier versions wrong behaviors are expected to happen.' )
     print( 'Please update CCXT.' )
+    print( '============== * WARNING * ==============\n')
+elif( CCXTversion > fixVersionFormat('4.0.88') and CCXTversion < fixVersionFormat('4.0.101') ):
+    print( '\n============== * WARNING * ==============')
+    print( 'There is a problem with CCXT versions between to 4.0.88 and 4.0.101')
+    print( 'when changing marginMode in *Bybit*. Please update CCXT module' )
     print( '============== * WARNING * ==============\n')
     
 
@@ -133,7 +139,7 @@ class account_c:
         self.ordersQueue = []
         self.activeOrders = []
         self.latchedAlerts = []
-        self.MARGIN_MODE = 'cross' if ( marginMode != None and marginMode.lower() == 'cross') else 'isolated'
+        self.marginMode = 'cross' if ( marginMode != None and marginMode.lower() == 'cross') else MARGIN_MODE
         self.SETTLE_COIN = 'USDT' if( settleCoin == None ) else settleCoin
 
         if( exchange == None ):
@@ -148,14 +154,14 @@ class account_c:
                 'secret': secret,
                 'password': password,
                 'enableRateLimit': False,
-                "options": {'defaultType': 'swap', 'defaultMarginMode':self.MARGIN_MODE, 'adjustForTimeDifference' : True},
+                "options": {'defaultType': 'swap', 'defaultMarginMode':MARGIN_MODE, 'adjustForTimeDifference' : True},
                 } )
         elif( exchange.lower() == 'bitget' ):
             self.exchange = ccxt.bitget({
                 "apiKey": apiKey,
                 "secret": secret,
                 'password': password,
-                "options": {'defaultType': 'swap', 'defaultMarginMode':self.MARGIN_MODE, 'adjustForTimeDifference' : True},
+                "options": {'defaultType': 'swap', 'defaultMarginMode':MARGIN_MODE, 'adjustForTimeDifference' : True},
                 #"timeout": 60000,
                 "enableRateLimit": False
                 })
@@ -165,7 +171,7 @@ class account_c:
                 "apiKey": apiKey,
                 "secret": secret,
                 'password': password,
-                "options": {'defaultType': 'swap', 'defaultMarginMode':self.MARGIN_MODE, 'adjustForTimeDifference' : True},
+                "options": {'defaultType': 'swap', 'defaultMarginMode':MARGIN_MODE, 'adjustForTimeDifference' : True},
                 #"timeout": 60000,
                 "enableRateLimit": False
                 })
@@ -174,7 +180,7 @@ class account_c:
                 "apiKey": apiKey,
                 "secret": secret,
                 'password': password,
-                "options": {'defaultType': 'swap', 'defaultMarginMode':self.MARGIN_MODE, 'adjustForTimeDifference' : True},
+                "options": {'defaultType': 'swap', 'defaultMarginMode':MARGIN_MODE, 'adjustForTimeDifference' : True},
                 #"timeout": 60000,
                 "enableRateLimit": False
                 })
@@ -184,7 +190,7 @@ class account_c:
                 "apiKey": apiKey,
                 "secret": secret,
                 'password': password,
-                "options": {'defaultType': 'swap', 'defaultMarginMode':self.MARGIN_MODE, 'adjustForTimeDifference' : True},
+                "options": {'defaultType': 'swap', 'defaultMarginMode':MARGIN_MODE, 'adjustForTimeDifference' : True},
                 #"timeout": 60000,
                 "enableRateLimit": False
                 })
@@ -195,7 +201,7 @@ class account_c:
                 "apiKey": apiKey,
                 "secret": secret,
                 'password': password,
-                "options": {'defaultType': 'swap', 'defaultMarginMode':self.MARGIN_MODE, 'adjustForTimeDifference' : True},
+                "options": {'defaultType': 'swap', 'defaultMarginMode':MARGIN_MODE, 'adjustForTimeDifference' : True},
                 #"timeout": 60000,
                 "enableRateLimit": False
                 })
@@ -207,7 +213,7 @@ class account_c:
                 "apiKey": apiKey,
                 "secret": secret,
                 'password': password,
-                "options": {'defaultType': 'swap', 'defaultMarginMode':self.MARGIN_MODE, 'adjustForTimeDifference' : True},
+                "options": {'defaultType': 'swap', 'defaultMarginMode':MARGIN_MODE, 'adjustForTimeDifference' : True},
                 #"timeout": 60000,
                 "enableRateLimit": True
                 })
@@ -216,7 +222,7 @@ class account_c:
                 "apiKey": apiKey,
                 "secret": secret,
                 'password': password,
-                "options": {'defaultType': 'swap', 'defaultMarginMode':self.MARGIN_MODE, 'adjustForTimeDifference' : True},
+                "options": {'defaultType': 'swap', 'defaultMarginMode':MARGIN_MODE, 'adjustForTimeDifference' : True},
                 #"timeout": 60000,
                 "enableRateLimit": True
                 })
@@ -245,7 +251,7 @@ class account_c:
                 "apiKey": apiKey,
                 "secret": secret,
                 'password': password,
-                "options": {'defaultType': 'swap', 'defaultMarginMode':self.MARGIN_MODE, 'adjustForTimeDifference' : True},
+                "options": {'defaultType': 'swap', 'defaultMarginMode':MARGIN_MODE, 'adjustForTimeDifference' : True},
                 #"timeout": 60000,
                 "enableRateLimit": True
                 })
@@ -257,7 +263,7 @@ class account_c:
                 "apiKey": apiKey,
                 "secret": secret,
                 'password': password,
-                "options": {'defaultType': 'swap', 'defaultMarginMode':self.MARGIN_MODE, 'adjustForTimeDifference' : True},
+                "options": {'defaultType': 'swap', 'defaultMarginMode':MARGIN_MODE, 'adjustForTimeDifference' : True},
                 #"timeout": 60000,
                 "enableRateLimit": True
                 })
@@ -453,7 +459,7 @@ class account_c:
         ##########################################
         # Update marginMode if needed
         ##########################################   
-        if( self.markets[ symbol ]['local']['marginMode'] != self.MARGIN_MODE and self.exchange.has.get('setMarginMode') == True ):
+        if( self.markets[ symbol ]['local']['marginMode'] != MARGIN_MODE and self.exchange.has.get('setMarginMode') == True ):
 
             params = {}
             # coinex and bybit expect the leverage as part of the marginMode call
@@ -463,12 +469,12 @@ class account_c:
                 params['lever'] = leverage
 
             try:
-                response = self.exchange.set_margin_mode( self.MARGIN_MODE, symbol, params )
+                response = self.exchange.set_margin_mode( MARGIN_MODE, symbol, params )
 
             except ccxt.NoChange as e:
-                self.markets[ symbol ]['local']['marginMode'] = self.MARGIN_MODE
+                self.markets[ symbol ]['local']['marginMode'] = MARGIN_MODE
             except ccxt.MarginModeAlreadySet as e:
-                self.markets[ symbol ]['local']['marginMode'] = self.MARGIN_MODE
+                self.markets[ symbol ]['local']['marginMode'] = MARGIN_MODE
             except Exception as e:
                 for a in e.args:
                     if( '"retCode":140026' in a or "No need to change margin type" in a
@@ -479,7 +485,7 @@ class account_c:
                         # bybit {"retCode":110026,"retMsg":"Cross/isolated margin mode is not modified","result":{},"retExtInfo":{},"time":1695526888984}
                         # binance {'code': -4046, 'msg': 'No need to change margin type.'}
                         # updateSymbolLeverage->set_margin_mode: {'code': -4046, 'msg': 'No need to change margin type.'}
-                        self.markets[ symbol ]['local']['marginMode'] = self.MARGIN_MODE
+                        self.markets[ symbol ]['local']['marginMode'] = MARGIN_MODE
                     else:
                         print( " * E: updateSymbolLeverage->set_margin_mode:", a, type(e) )
             else:
@@ -501,7 +507,7 @@ class account_c:
                 if( code != 0 ):
                     print( " * E: updateSymbolLeverage->set_margin_mode:", response )
                 else:
-                    self.markets[ symbol ]['local']['marginMode'] = self.MARGIN_MODE
+                    self.markets[ symbol ]['local']['marginMode'] = MARGIN_MODE
 
                     # coinex and bybit don't need to continue since they have already updated the leverage
                     if( self.exchange.id == 'coinex' or self.exchange.id == 'bybit' ):
@@ -601,10 +607,6 @@ class account_c:
             data = response['info']['accounts']['flex']
             return { 'free':float(data.get('availableMargin')), 'used':float(data.get('initialMarginWithOrders')), 'total': float(data.get('balanceValue')) }
 
-        if( response.get(self.SETTLE_COIN) == None ):
-            balance = { 'free':0.0, 'used':0.0, 'total':0.0 }
-            return balance
-        
         return response.get(self.SETTLE_COIN)
     
 
@@ -788,6 +790,16 @@ class account_c:
         for thisPosition in positions:
 
             symbol = thisPosition.get('symbol')
+
+            # HACK!! coinex doesn't have 'contracts'. The value comes in 'contractSize' and in info:{'amount'}
+            # reminder: Version 4.1.11 of ccxt fixes this. I'll keep it by now, but should remove it later.
+            if( self.exchange.id == 'coinex' ):
+                thisPosition['contracts'] = float( thisPosition['info']['amount'] )
+
+            # HACK!! bingx doesn't have 'contracts'. The value comes in 'contractSize' and in info:{'positionAmt'}
+            # reminder: Version 4.1.10 of ccxt fixes this. I'll keep it by now, but should remove it later.
+            if( self.exchange.id == 'bingx' ):
+                thisPosition['contracts'] = float( thisPosition['info']['positionAmt'] )
 
             # HACK!! bybit response doesn't contain a 'hedge' key, but it contains the information in the 'info' block
             if( self.exchange.id == 'bybit' ):
@@ -1070,7 +1082,7 @@ class account_c:
 
             if( self.exchange.id == 'kucoinfutures' ): # Kucoin doesn't use setLeverage nor setMarginMode
                 params['leverage'] = max( order.leverage, 1 )
-                params['marginMode'] = self.MARGIN_MODE
+                params['marginMode'] = MARGIN_MODE
 
             if( self.exchange.id == 'bitget' ):
                 params['side'] = 'buy_single' if( order.side == "buy" ) else 'sell_single'
@@ -1080,11 +1092,11 @@ class account_c:
 
             if( self.exchange.id == 'krakenfutures' ):
                 params['leverage'] = max( order.leverage, 1 )
-                params['marginMode'] = self.MARGIN_MODE
+                params['marginMode'] = MARGIN_MODE
 
             if( self.exchange.id == 'okx' ):
                 params['leverage'] = max( order.leverage, 1 )
-                params['marginMode'] = self.MARGIN_MODE
+                params['marginMode'] = MARGIN_MODE
 
             if( order.type == 'limit' ):
                 if( self.exchange.id == 'krakenfutures' ):
@@ -1353,7 +1365,7 @@ class account_c:
                 else:
                     command = 'buy'
                 quantity = abs(quantity)
-            elif( self.markets[symbol]['local']['marginMode'] != self.MARGIN_MODE and self.exchange.has['setMarginMode'] ):
+            elif( self.markets[symbol]['local']['marginMode'] != MARGIN_MODE and self.exchange.has['setMarginMode'] ):
                 # to change marginMode we need to close the old position first
                 if( pos.getKey('side') == 'long' ):
                     self.ordersQueue.append( order_c( symbol, 'sell', pos.getKey('contracts'), 0 ) )
@@ -1720,7 +1732,7 @@ try:
         accounts_file.close()
 except FileNotFoundError:
     with open('accounts.json', 'x') as f:
-        f.write( '[\n\t{\n\t\t"ACCOUNT_ID":"your_account_name", \n\t\t"EXCHANGE":"exchange_name", \n\t\t"API_KEY":"your_api_key", \n\t\t"SECRET_KEY":"your_secret_key", \n\t\t"PASSWORD":"your_API_password", \n\t\t"MARGIN_MODE":"isolated"\n\t}\n]' )
+        f.write( '[\n\t{\n\t\t"ACCOUNT_ID":"your_account_name", \n\t\t"EXCHANGE":"exchange_name", \n\t\t"API_KEY":"your_api_key", \n\t\t"SECRET_KEY":"your_secret_key", \n\t\t"PASSWORD":"your_API_password"\n\t}\n]' )
         f.close()
     print( "File 'accounts.json' not found. Template created. Please fill your API Keys into the file and try again")
     print( "Exiting." )
@@ -1819,6 +1831,5 @@ timerOrdersQueue.start()
 # start the webhook server
 if __name__ == '__main__':
     print( " * Listening" )
-    app.run(host="0.0.0.0", port=80, debug=False)
-
+    app.run(host="0.0.0.0", port=80, debug=True)
 
